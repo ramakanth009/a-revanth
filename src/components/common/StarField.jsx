@@ -2,36 +2,22 @@ import React, { useEffect, useState, useMemo } from 'react';
 
 const StarField = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [viewport, setViewport] = useState({ width: window.innerWidth, height: window.innerHeight });
-
-  // Update viewport size on resize
-  useEffect(() => {
-    const handleResize = () => setViewport({ width: window.innerWidth, height: window.innerHeight });
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   // Generate stars with various properties
   const stars = useMemo(() => {
     const starArray = [];
-    const numStars = 400; // Reduced from 800 for more gap
+    const numStars = 800;
 
     for (let i = 0; i < numStars; i++) {
       const size = Math.random() * 3 + 0.5;
       const brightness = Math.random();
       const duration = Math.random() * 3 + 2;
       const delay = Math.random() * 5;
-      // Spread stars more by using a grid with random jitter
-      const gridSize = 20;
-      const row = Math.floor(i / gridSize);
-      const col = i % gridSize;
-      const left = (col + Math.random() * 0.7) * (100 / gridSize);
-      const top = (row + Math.random() * 0.7) * (100 / gridSize);
-
+      
       starArray.push({
         id: i,
-        left,
-        top,
+        left: Math.random() * 100,
+        top: Math.random() * 100,
         size,
         brightness,
         duration,
@@ -41,34 +27,19 @@ const StarField = () => {
     return starArray;
   }, []);
 
-  // Generate additional dense star field ONCE
-  const smallStars = useMemo(() => {
-    const numSmallStars = 80; // Reduced for more gap
-    const gridSize = 9;
-    return Array.from({ length: numSmallStars }, (_, i) => {
-      const row = Math.floor(i / gridSize);
-      const col = i % gridSize;
-      const left = (col + Math.random() * 0.8) * (100 / gridSize);
-      const top = (row + Math.random() * 0.8) * (100 / gridSize);
-      return {
-        id: i,
-        left,
-        top,
-        opacity: Math.random() * 0.8 + 0.2,
-        duration: Math.random() * 4 + 2,
-        delay: Math.random() * 3,
-      };
-    });
-  }, []);
-
-  // Shooting stars: always animate from top-left to bottom-right
+  // Generate shooting stars
   const shootingStars = useMemo(() => {
-    // Decrease shooting star count to 1
-    return Array.from({ length: 1 }, (_, i) => ({
-      id: i,
-      duration: Math.random() * 4 + 5, // 5s to 8s
-      delay: Math.random() * 10,
-    }));
+    const shootingArray = [];
+    for (let i = 0; i < 3; i++) {
+      shootingArray.push({
+        id: i,
+        left: Math.random() * 100,
+        top: Math.random() * 50,
+        duration: Math.random() * 2 + 3,
+        delay: Math.random() * 10,
+      });
+    }
+    return shootingArray;
   }, []);
 
   // Mouse parallax effect
@@ -91,8 +62,8 @@ const StarField = () => {
     width: '100%',
     height: '100%',
     background: `
-      // radial-gradient(ellipse at top, #1a1a1a 0%, #2a2a2a 25%, #0f0f0f 50%, #000000 100%),
-      // radial-gradient(ellipse at bottom, #1e1e1e 0%, #151515 25%, #0a0a0a 75%, #000000 100%)
+      radial-gradient(ellipse at top, #1a1a1a 0%, #2a2a2a 25%, #0f0f0f 50%, #000000 100%),
+      radial-gradient(ellipse at bottom, #1e1e1e 0%, #151515 25%, #0a0a0a 75%, #000000 100%)
     `,
     overflow: 'hidden',
     zIndex: -1,
@@ -105,13 +76,13 @@ const StarField = () => {
     width: '120%',
     height: '80%',
     background: `
-    //   linear-gradient(45deg, 
-    //     transparent 30%,
-    //     rgba(255, 255, 255, 0.01) 40%,
-    //     rgba(255, 255, 255, 0.03) 50%,
-    //     rgba(255, 255, 255, 0.01) 60%,
-    //     transparent 70%)
-    // `,
+      linear-gradient(45deg, 
+        transparent 30%,
+        rgba(255, 255, 255, 0.01) 40%,
+        rgba(255, 255, 255, 0.03) 50%,
+        rgba(255, 255, 255, 0.01) 60%,
+        transparent 70%)
+    `,
     transform: `rotate(-15deg) translate(${mousePosition.x * 0.1}px, ${mousePosition.y * 0.1}px)`,
     borderRadius: '50%',
   };
@@ -148,6 +119,23 @@ const StarField = () => {
             }
           }
 
+          @keyframes shootingStar {
+            0% {
+              transform: translateX(-100px) translateY(-300px);
+              opacity: 0;
+            }
+            10% {
+              opacity: 1;
+            }
+            90% {
+              opacity: 1;
+            }
+            100% {
+              transform: translateX(-300px) translateY(100px);
+              opacity: 0;
+            }
+          }
+
           @keyframes galaxyRotate {
             0% { 
               transform: rotate(0deg); 
@@ -161,12 +149,12 @@ const StarField = () => {
             content: "";
             position: absolute;
             top: 0;
-            left: 0px;
+            left: 1px;
             width: 80px;
             height: 1px;
             background: linear-gradient(90deg, #ffffff, transparent);
             transform-origin: 0 0;
-            transform: rotate(200deg);
+            transform: rotate(316deg);
           }
         `}
       </style>
@@ -202,69 +190,39 @@ const StarField = () => {
         ))}
 
         {/* Shooting stars */}
-        {shootingStars.map((star) => {
-          // Calculate start and end points for the diagonal
-          const startX = 0;
-          const startY = 0;
-          const endX = viewport.width;
-          const endY = viewport.height;
-          return (
-            <div
-              key={star.id}
-              className="shooting-star"
-              style={{
-                position: 'absolute',
-                width: '2px',
-                height: '2px',
-                background: 'linear-gradient(45deg, #ffffff, #f0f0f0, transparent)',
-                borderRadius: '50%',
-                left: 0,
-                top: 0,
-                // Animate along the diagonal using inline keyframes
-                animation: `shootingStar${star.id} ${star.duration}s linear infinite`,
-                animationDelay: `${star.delay}s`,
-                pointerEvents: 'none',
-              }}
-            >
-              <style>
-                {`
-                  @keyframes shootingStar${star.id} {
-                    0% {
-                      transform: translate(${startX}px, ${startY}px);
-                      opacity: 0;
-                    }
-                    10% {
-                      opacity: 1;
-                    }
-                    90% {
-                      opacity: 1;
-                    }
-                    100% {
-                      transform: translate(${endX}px, ${endY}px);
-                      opacity: 0;
-                    }
-                  }
-                `}
-              </style>
-            </div>
-          );
-        })}
-
-        {/* Additional dense star field */}
-        {smallStars.map((star) => (
+        {shootingStars.map((star) => (
           <div
-            key={`small-star-${star.id}`}
+            key={star.id}
+            className="shooting-star"
             style={{
               position: 'absolute',
+              width: '2px',
+              height: '2px',
+              background: 'linear-gradient(45deg, #ffffff, #f0f0f0, transparent)',
+              borderRadius: '50%',
+              animation: `shootingStar ${star.duration}s linear infinite`,
+              animationDelay: `${star.delay}s`,
               left: `${star.left}%`,
               top: `${star.top}%`,
+            }}
+          />
+        ))}
+
+        {/* Additional dense star field */}
+        {Array.from({ length: 200 }, (_, i) => (
+          <div
+            key={`small-star-${i}`}
+            style={{
+              position: 'absolute',
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
               width: '1px',
               height: '1px',
               background: '#ffffff',
               borderRadius: '50%',
-              opacity: star.opacity,
-              animation: `twinkle ${star.duration}s ease-in-out infinite`,
-              animationDelay: `${star.delay}s`,
+              opacity: Math.random() * 0.8 + 0.2,
+              animation: `twinkle ${Math.random() * 4 + 2}s ease-in-out infinite`,
+              animationDelay: `${Math.random() * 3}s`,
             }}
           />
         ))}
