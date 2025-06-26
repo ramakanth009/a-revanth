@@ -1,99 +1,82 @@
-// src/pages/Dashboard.jsx - Complete rewrite for single character focus
 import React, { useState } from 'react';
 import { Box } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import RevanthReddyCard from '../components/dashboard/RevanthReddyCard';
-import SimpleChat from '../components/dashboard/SimpleChat';
+import Sidebar from '../components/dashboard/Sidebar';
+import Header from '../components/dashboard/Header';
+import CharacterGrid from '../components/dashboard/CharacterGrid';
+import ChatPanel from '../components/dashboard/ChatPanel';
 
-// This is the new main container - think of it as a clean, minimal room
-// with just what we need: a profile card and a chat area
 const DashboardContainer = styled(Box)(({ theme }) => ({
-  minHeight: '100vh',
-  background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
   display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
+  minHeight: '100vh',
+  background: theme.palette.background.default,
+}));
+
+const MainContent = styled(Box)(({ theme }) => ({
+  marginLeft: 280,
+  flex: 1,
+  display: 'flex',
+  [theme.breakpoints.down('md')]: {
+    marginLeft: 0,
+  },
+}));
+
+const ContentArea = styled(Box)(({ theme, chatOpen }) => ({
+  flex: 1,
   padding: theme.spacing(3),
-  position: 'relative',
-  // Responsive design for mobile
+  overflow: 'auto',
+  transition: 'all 0.3s ease',
+  display: chatOpen ? 'none' : 'block', // Always hide when chat is open
   [theme.breakpoints.down('md')]: {
     padding: theme.spacing(2),
-    alignItems: 'flex-start',
-    paddingTop: theme.spacing(4),
   },
-}));
-
-// The main content area that holds either the card or the chat
-const ContentArea = styled(Box)(({ theme }) => ({
-  width: '100%',
-  maxWidth: 1200,
-  position: 'relative',
-  display: 'flex',
-  justifyContent: 'center',
-  // On mobile, take full width
-  [theme.breakpoints.down('md')]: {
-    maxWidth: '100%',
-  },
-}));
-
-// When chat is open, we'll slide the chat panel in from the right
-const ChatContainer = styled(Box)(({ theme, isOpen }) => ({
-  position: 'fixed',
-  top: 0,
-  right: isOpen ? 0 : '-100%',
-  width: '60%',
-  height: '100vh',
-  transition: 'right 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-  zIndex: 1000,
-  // On mobile, chat takes full screen
-  [theme.breakpoints.down('md')]: {
-    width: '100%',
-    right: isOpen ? 0 : '-100%',
-  },
-}));
-
-// Simple backdrop to dim the background when chat is open
-const Backdrop = styled(Box)(({ theme, isOpen }) => ({
-  position: 'fixed',
-  top: 0,
-  left: 0,
-  width: '100%',
-  height: '100%',
-  backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  opacity: isOpen ? 1 : 0,
-  visibility: isOpen ? 'visible' : 'hidden',
-  transition: 'all 0.3s ease',
-  zIndex: 999,
 }));
 
 const Dashboard = () => {
-  // Simple state management - just track if chat is open or closed
+  const [selectedCharacter, setSelectedCharacter] = useState(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState('Discover');
 
-  // Handler for when user clicks "Ready to Chat" button
-  const handleStartChat = () => {
+  const handleCharacterClick = (character) => {
+    setSelectedCharacter(character);
     setIsChatOpen(true);
   };
 
-  // Handler for when user closes the chat
-  const handleCloseChat = () => {
+  const handleChatClose = () => {
     setIsChatOpen(false);
+    setTimeout(() => setSelectedCharacter(null), 300); // Delay for animation
+  };
+
+  const handleBackToCharacters = () => {
+    setIsChatOpen(false);
+    // Don't clear selectedCharacter immediately to allow for potential re-opening
+  };
+
+  const handleSectionChange = (section) => {
+    setActiveSection(section);
   };
 
   return (
     <DashboardContainer>
-      {/* Backdrop appears when chat is open */}
-      <Backdrop isOpen={isChatOpen} onClick={handleCloseChat} />
-      
-      {/* Main content area with the Revanth Reddy card */}
-      <ContentArea>
-        <RevanthReddyCard onStartChat={handleStartChat} />
-      </ContentArea>
-
-      {/* Chat panel that slides in from the right */}
-      <ChatContainer isOpen={isChatOpen}>
-        <SimpleChat onClose={handleCloseChat} />
-      </ChatContainer>
+      <Sidebar 
+        activeSection={activeSection}
+        onSectionChange={handleSectionChange}
+      />
+      <MainContent>
+        <ContentArea chatOpen={isChatOpen}>
+          <Header />
+          <CharacterGrid 
+            onCharacterClick={handleCharacterClick}
+            activeSection={activeSection}
+          />
+        </ContentArea>
+        <ChatPanel
+          open={isChatOpen}
+          character={selectedCharacter}
+          onClose={handleChatClose}
+          onBack={handleBackToCharacters}
+        />
+      </MainContent>
     </DashboardContainer>
   );
 };

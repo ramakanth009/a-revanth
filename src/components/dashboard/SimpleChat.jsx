@@ -1,4 +1,4 @@
-// src/components/dashboard/SimpleChat.jsx
+// src/components/dashboard/SimpleChat.jsx - Pure Backend Integration
 import React, { useState, useRef, useEffect } from 'react';
 import {
   Box,
@@ -9,12 +9,13 @@ import {
   Paper,
   Fade,
   CircularProgress,
+  Alert,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { Close, Send, ArrowBack } from '@mui/icons-material';
+import { Close, Send, Refresh, History } from '@mui/icons-material';
+import apiService from '../../services/api';
 
-// The main chat container - think of this as a clean, focused conversation space
-// We want users to feel like they're having a private conversation with Revanth Reddy
+// All styled components remain the same as before...
 const ChatContainer = styled(Box)(({ theme }) => ({
   height: '100vh',
   display: 'flex',
@@ -24,7 +25,6 @@ const ChatContainer = styled(Box)(({ theme }) => ({
   position: 'relative',
 }));
 
-// Chat header shows who you're talking to - simple and clean
 const ChatHeader = styled(Box)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
@@ -36,7 +36,7 @@ const ChatHeader = styled(Box)(({ theme }) => ({
 
 const HeaderInfo = styled(Box)({
   flex: 1,
-  minWidth: 0, // Allows text to truncate if needed
+  minWidth: 0,
 });
 
 const HeaderName = styled(Typography)(({ theme }) => ({
@@ -48,7 +48,7 @@ const HeaderName = styled(Typography)(({ theme }) => ({
 
 const OnlineStatus = styled(Typography)(({ theme }) => ({
   fontSize: '0.85rem',
-  color: '#4CAF50', // Green to show "online"
+  color: '#4CAF50',
   display: 'flex',
   alignItems: 'center',
   gap: theme.spacing(0.5),
@@ -67,7 +67,6 @@ const OnlineDot = styled(Box)({
   },
 });
 
-// Messages area - this is where the conversation flows
 const MessagesArea = styled(Box)(({ theme }) => ({
   flex: 1,
   overflow: 'hidden',
@@ -83,7 +82,6 @@ const MessagesContainer = styled(Box)(({ theme }) => ({
   flexDirection: 'column',
   gap: theme.spacing(2),
   
-  // Custom scrollbar styling
   '&::-webkit-scrollbar': {
     width: 6,
   },
@@ -96,13 +94,12 @@ const MessagesContainer = styled(Box)(({ theme }) => ({
   },
 }));
 
-// Individual message styling - different for user vs Revanth Reddy
-const MessageBubble = styled(Paper)(({ theme, isUser }) => ({
+const MessageBubble = styled(Paper)(({ theme, isUser, isError }) => ({
   maxWidth: '75%',
   padding: theme.spacing(1.5, 2),
   marginLeft: isUser ? 'auto' : 0,
   marginRight: isUser ? 0 : 'auto',
-  backgroundColor: isUser ? '#667eea' : '#333',
+  backgroundColor: isError ? '#d32f2f' : (isUser ? '#667eea' : '#333'),
   color: '#ffffff',
   borderRadius: isUser ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
   boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
@@ -121,7 +118,6 @@ const MessageTime = styled(Typography)(({ theme }) => ({
   marginTop: theme.spacing(0.5),
 }));
 
-// Avatar for Revanth Reddy's messages
 const MessageAvatar = styled(Avatar)(({ theme }) => ({
   width: 32,
   height: 32,
@@ -135,7 +131,6 @@ const MessageWithAvatar = styled(Box)({
   gap: 8,
 });
 
-// Input area for typing messages
 const InputArea = styled(Box)(({ theme }) => ({
   padding: theme.spacing(2, 3),
   borderTop: '1px solid #333',
@@ -185,28 +180,47 @@ const SendButton = styled(IconButton)(({ theme }) => ({
   },
 }));
 
-// Welcome message component
-const WelcomeMessage = styled(Box)(({ theme }) => ({
-  textAlign: 'center',
-  padding: theme.spacing(4, 2),
-  color: '#888',
+const LoadingContainer = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  padding: theme.spacing(4),
+}));
+
+const ErrorAlert = styled(Alert)(({ theme }) => ({
+  margin: theme.spacing(2),
+  backgroundColor: '#d32f2f',
+  color: '#ffffff',
+  '& .MuiAlert-icon': {
+    color: '#ffffff',
+  },
 }));
 
 const SimpleChat = ({ onClose }) => {
-  // Simple state management - just messages and input
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      text: "Hello! I'm A. Revanth Reddy, Chief Minister of Telangana. I'm here to discuss governance, policy initiatives, and answer any questions you might have about our state's development. How can I assist you today?",
-      isUser: false,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    }
-  ]);
+  // Core state management - all connected to real backend data
+  const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [conversationId, setConversationId] = useState(null);
+  const [error, setError] = useState(null);
+  const [isInitializing, setIsInitializing] = useState(true);
+  const [serverStatus, setServerStatus] = useState('connecting');
   const messagesEndRef = useRef(null);
 
-  // Auto-scroll to bottom when new messages arrive
+  /**
+   * BACKEND INTEGRATION: Component Initialization
+   * 
+   * When the chat opens, we need to:
+   * 1. Check if the backend server is available
+   * 2. Initialize a new conversation with Revanth Reddy
+   * 3. Load any existing conversation if user has one
+   * 
+   * This is like opening a phone app - first check for signal, then dial the number
+   */
+  useEffect(() => {
+    initializeChat();
+  }, []);
+
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -215,7 +229,123 @@ const SimpleChat = ({ onClose }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Handle sending a message
+  /**
+   * Initialize chat with real backend connection
+   * This replaces any dummy welcome messages with actual server communication
+   */
+  const initializeChat = async () => {
+    try {
+      setIsInitializing(true);
+      setError(null);
+      setServerStatus('connecting');
+
+      // Step 1: Verify backend server is available
+      const isServerUp = await apiService.isServerAvailable();
+      if (!isServerUp) {
+        throw new Error('Unable to connect to chat service. Please try again later.');
+      }
+
+      setServerStatus('connected');
+
+      // Step 2: Check if user has any existing conversations with Revanth Reddy
+      const conversationsResult = await apiService.getRevanthConversations();
+      
+      if (conversationsResult.success && conversationsResult.conversations.length > 0) {
+        // User has previous conversations - load the most recent one
+        const mostRecentConversation = conversationsResult.conversations[0];
+        setConversationId(mostRecentConversation.session_id);
+        
+        // Load conversation history
+        await loadConversationHistory(mostRecentConversation.session_id);
+      } else {
+        // No previous conversations - start fresh with real backend initialization
+        await startNewConversation();
+      }
+
+    } catch (error) {
+      console.error('Failed to initialize chat:', error);
+      setError(error.message);
+      setServerStatus('error');
+    } finally {
+      setIsInitializing(false);
+    }
+  };
+
+  /**
+   * Start a completely new conversation with the backend
+   * This creates a real session with Revanth Reddy, not a simulated one
+   */
+  const startNewConversation = async () => {
+    try {
+      setIsLoading(true);
+      
+      // Send an initial message to the backend to start the conversation
+      // This will create a real session and return Revanth Reddy's actual greeting
+      const result = await apiService.sendMessageToRevanth(
+        "Hello", // Simple greeting to start the conversation
+        null, // No existing conversation ID
+        true // Explicitly request new session
+      );
+
+      if (result.success) {
+        setConversationId(result.conversationId);
+        
+        // Add the real welcome message from the backend
+        const welcomeMessage = {
+          id: Date.now(),
+          text: result.response,
+          isUser: false,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        };
+        
+        setMessages([welcomeMessage]);
+      } else {
+        throw new Error('Failed to start conversation with Revanth Reddy');
+      }
+    } catch (error) {
+      console.error('Error starting new conversation:', error);
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /**
+   * Load existing conversation history from backend
+   * This retrieves real message history, not placeholder data
+   */
+  const loadConversationHistory = async (sessionId) => {
+    try {
+      const result = await apiService.getRevanthConversation(sessionId);
+      
+      if (result.success) {
+        // Transform backend message format to our UI format
+        const formattedMessages = result.messages.map((msg, index) => ({
+          id: `${sessionId}-${index}`,
+          text: msg.content || msg.message,
+          isUser: msg.role === 'user',
+          timestamp: msg.timestamp 
+            ? new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        }));
+        
+        setMessages(formattedMessages);
+      } else {
+        throw new Error('Failed to load conversation history');
+      }
+    } catch (error) {
+      console.error('Error loading conversation history:', error);
+      // If we can't load history, start fresh
+      await startNewConversation();
+    }
+  };
+
+  /**
+   * BACKEND INTEGRATION: Real Message Sending
+   * 
+   * This completely replaces the setTimeout simulation with actual API calls
+   * Every message goes to the real backend and returns real responses
+   */
   const handleSend = async () => {
     if (!inputValue.trim() || isLoading) return;
 
@@ -226,29 +356,67 @@ const SimpleChat = ({ onClose }) => {
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
 
-    // Add user message immediately
+    // Optimistic update - show user message immediately for responsive UI
     setMessages(prev => [...prev, userMessage]);
+    const messageToSend = inputValue;
     setInputValue('');
     setIsLoading(true);
+    setError(null);
 
     try {
-      // Here you would integrate with your API service
-      // For now, we'll simulate a response
-      setTimeout(() => {
+      // Real backend call - no simulation, no setTimeout
+      const result = await apiService.sendMessageToRevanth(
+        messageToSend,
+        conversationId,
+        false // Not a new session, continuing existing conversation
+      );
+      
+      if (result.success) {
+        // Add real response from Revanth Reddy via backend
         const botResponse = {
           id: Date.now() + 1,
-          text: "Thank you for your question. As Chief Minister, I'm committed to transparent governance and citizen engagement. Could you please share more details about what specific aspect you'd like to discuss?",
+          text: result.response,
           isUser: false,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         };
         
         setMessages(prev => [...prev, botResponse]);
-        setIsLoading(false);
-      }, 1500);
+        
+        // Update conversation ID if this was the first message in a new conversation
+        if (result.conversationId && !conversationId) {
+          setConversationId(result.conversationId);
+        }
+      } else {
+        throw new Error('Failed to get response from Revanth Reddy');
+      }
     } catch (error) {
       console.error('Error sending message:', error);
+      
+      // Show user-friendly error message in the chat
+      const errorMessage = {
+        id: Date.now() + 1,
+        text: `I apologize, but I'm experiencing technical difficulties. ${error.message} Please try again in a moment.`,
+        isUser: false,
+        isError: true,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
+      setError(error.message);
+    } finally {
       setIsLoading(false);
     }
+  };
+
+  /**
+   * Handle starting a completely new conversation
+   * This clears current state and creates a fresh backend session
+   */
+  const handleNewConversation = async () => {
+    setMessages([]);
+    setConversationId(null);
+    setError(null);
+    await startNewConversation();
   };
 
   const handleKeyPress = (e) => {
@@ -258,9 +426,25 @@ const SimpleChat = ({ onClose }) => {
     }
   };
 
+  // Show loading state while initializing backend connection
+  if (isInitializing) {
+    return (
+      <ChatContainer>
+        <LoadingContainer>
+          <Box sx={{ textAlign: 'center' }}>
+            <CircularProgress sx={{ color: '#667eea', mb: 2 }} />
+            <Typography color="#888">
+              {serverStatus === 'connecting' ? 'Connecting to Revanth Reddy...' : 'Initializing conversation...'}
+            </Typography>
+          </Box>
+        </LoadingContainer>
+      </ChatContainer>
+    );
+  }
+
   return (
     <ChatContainer>
-      {/* Header */}
+      {/* Header with real online status */}
       <ChatHeader>
         <Avatar
           src="/assets/revanth-reddy.jpg"
@@ -272,9 +456,17 @@ const SimpleChat = ({ onClose }) => {
           <HeaderName>A. Revanth Reddy</HeaderName>
           <OnlineStatus>
             <OnlineDot />
-            Online now
+            {serverStatus === 'connected' ? 'Online now' : 'Connecting...'}
           </OnlineStatus>
         </HeaderInfo>
+
+        <IconButton
+          onClick={handleNewConversation}
+          sx={{ color: '#888', '&:hover': { color: '#ffffff' } }}
+          title="Start New Conversation"
+        >
+          <Refresh />
+        </IconButton>
 
         <IconButton
           onClick={onClose}
@@ -284,22 +476,21 @@ const SimpleChat = ({ onClose }) => {
         </IconButton>
       </ChatHeader>
 
-      {/* Messages Area */}
+      {/* Show error alert if there are connection issues */}
+      {error && (
+        <ErrorAlert severity="error" onClose={() => setError(null)}>
+          Connection Issue: {error}
+        </ErrorAlert>
+      )}
+
+      {/* Messages Area with real backend data */}
       <MessagesArea>
         <MessagesContainer>
-          {messages.length === 1 && (
-            <WelcomeMessage>
-              <Typography variant="body2">
-                You're now chatting with A. Revanth Reddy
-              </Typography>
-            </WelcomeMessage>
-          )}
-
           {messages.map((message) => (
             <Fade key={message.id} in timeout={300}>
               <Box>
                 {message.isUser ? (
-                  <MessageBubble isUser={true}>
+                  <MessageBubble isUser={true} isError={message.isError}>
                     <MessageText>{message.text}</MessageText>
                   </MessageBubble>
                 ) : (
@@ -308,7 +499,7 @@ const SimpleChat = ({ onClose }) => {
                       src="/assets/revanth-reddy.jpg"
                       alt="A. Revanth Reddy"
                     />
-                    <MessageBubble isUser={false}>
+                    <MessageBubble isUser={false} isError={message.isError}>
                       <MessageText>{message.text}</MessageText>
                     </MessageBubble>
                   </MessageWithAvatar>
@@ -318,6 +509,7 @@ const SimpleChat = ({ onClose }) => {
             </Fade>
           ))}
 
+          {/* Real-time loading indicator during backend communication */}
           {isLoading && (
             <MessageWithAvatar>
               <MessageAvatar
@@ -327,7 +519,7 @@ const SimpleChat = ({ onClose }) => {
               <MessageBubble isUser={false}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <CircularProgress size={16} sx={{ color: '#888' }} />
-                  <MessageText>Typing...</MessageText>
+                  <MessageText>Revanth Reddy is typing...</MessageText>
                 </Box>
               </MessageBubble>
             </MessageWithAvatar>
@@ -340,18 +532,18 @@ const SimpleChat = ({ onClose }) => {
       {/* Input Area */}
       <InputArea>
         <MessageInput
-          placeholder="Type your message..."
+          placeholder="Type your message to Revanth Reddy..."
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyPress={handleKeyPress}
           multiline
           maxRows={3}
-          disabled={isLoading}
+          disabled={isLoading || serverStatus !== 'connected'}
         />
         
         <SendButton
           onClick={handleSend}
-          disabled={!inputValue.trim() || isLoading}
+          disabled={!inputValue.trim() || isLoading || serverStatus !== 'connected'}
         >
           <Send />
         </SendButton>
