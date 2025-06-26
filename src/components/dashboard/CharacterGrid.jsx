@@ -96,7 +96,7 @@ const CharacterGrid = ({ onCharacterClick, activeSection }) => {
     const apiCharacters = await apiService.getCharacters();
     const transformedCharacters = apiCharacters.map((char) => ({
       ...char,
-      creator: extractCreator(char.name) || 'LegendsAI',
+      creator: extractCreator(char.name) || 'Giga character AI',
       type: extractType(char.name) || 'Historical Figure',
       messages: generateStats().messages,
       likes: generateStats().likes,
@@ -170,7 +170,7 @@ const CharacterGrid = ({ onCharacterClick, activeSection }) => {
       'Sachin Tendulkar': 'SportsLegends',
       'Shah Rukh Khan': 'BollywoodStars',
     };
-    return creatorMap[name] || 'LegendsAI';
+    return creatorMap[name] || 'Giga character AI';
   };
 
   const extractType = (name) => {
