@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { Box } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import Sidebar from '../components/dashboard/Sidebar';
-import Header from '../components/dashboard/Header';
 import CharacterGrid from '../components/dashboard/CharacterGrid';
 import ChatPanel from '../components/dashboard/ChatPanel';
 
@@ -58,13 +56,9 @@ const Dashboard = () => {
 
   return (
     <DashboardContainer>
-      <Sidebar 
-        activeSection={activeSection}
-        onSectionChange={handleSectionChange}
-      />
+      
       <MainContent>
         <ContentArea chatOpen={isChatOpen}>
-          <Header />
           <CharacterGrid 
             onCharacterClick={handleCharacterClick}
             activeSection={activeSection}

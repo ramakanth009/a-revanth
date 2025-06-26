@@ -75,13 +75,27 @@ class ApiService {
     }
   }
 
-  // Character endpoints
+  // Modified Character endpoint - now fetches only Revanth Reddy (ID: 52)
   async getCharacters() {
     try {
-      const response = await this.client.get('/characters');
+      // Instead of fetching all characters, we fetch only the specific character
+      const response = await this.client.get('/character/52');
+      
+      // Wrap the single character in an array to maintain compatibility
+      // with existing code that expects an array of characters
+      return [response.data];
+    } catch (error) {
+      throw this.handleError(error, 'Failed to load character');
+    }
+  }
+
+  // Alternative method if you want to be more explicit about fetching a single character
+  async getSingleCharacter(characterId = 52) {
+    try {
+      const response = await this.client.get(`/character/${characterId}`);
       return response.data;
     } catch (error) {
-      throw this.handleError(error, 'Failed to load characters');
+      throw this.handleError(error, 'Failed to load character');
     }
   }
 
@@ -121,7 +135,8 @@ class ApiService {
     }
   }
 
-  // Character management (if you add these endpoints later)
+  // Character management methods - kept for potential future use
+  // Note: These might not be needed if you're only using one character
   async createCharacter(characterData) {
     try {
       const response = await this.client.post('/characters', characterData);
@@ -164,8 +179,6 @@ class ApiService {
           return new Error('Access forbidden');
         case 404:
           return new Error('Resource not found');
-        case 429:
-          return new Error('Too many requests. Please try again later.');
         case 500:
           return new Error('Server error. Please try again later.');
         default:
