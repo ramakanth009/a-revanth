@@ -178,11 +178,7 @@ const IconButtonStyled = styled(IconButton)(({ theme }) => ({
   },
 }));
 
-const RatingStars = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  gap: 2,
-  alignItems: 'center',
-}));
+
 
 const TopActions = styled(Box)(({ theme }) => ({
   position: 'absolute',
@@ -211,17 +207,7 @@ const CharacterCard = ({ character, onClick }) => {
             />
             <StatusBadge label="Online" size="small" />
             <TopActions>
-              <RatingStars>
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star 
-                    key={star} 
-                    sx={{ 
-                      fontSize: 16, 
-                      color: star <= (character.rating || 4) ? '#ffd700' : 'rgba(255,255,255,0.3)' 
-                    }} 
-                  />
-                ))}
-              </RatingStars>
+              
             </TopActions>
           </ImageContainer>
 
