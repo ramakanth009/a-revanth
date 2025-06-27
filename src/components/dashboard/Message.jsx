@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Paper } from '@mui/material';
+import { Box } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
 const MessageWrapper = styled(Box)(({ theme, isUser }) => ({
@@ -8,16 +8,17 @@ const MessageWrapper = styled(Box)(({ theme, isUser }) => ({
   marginBottom: theme.spacing(2),
 }));
 
-const MessageContent = styled(Paper)(({ theme, isUser }) => ({
+const MessageContent = styled('div')(({ theme }) => ({
   maxWidth: '70%',
   padding: theme.spacing(1.5, 2),
   borderRadius: 12,
   fontSize: '0.875rem',
   lineHeight: 1.4,
-  backgroundColor: isUser ? theme.palette.primary.main : theme.palette.background.paper,
-  color: isUser ? 'white' : theme.palette.text.primary,
-  border: isUser ? 'none' : `1px solid ${theme.palette.divider}`,
+  backgroundColor: theme.palette.background.paper,
+  color: theme.palette.text.primary,
+  border: `1px solid ${theme.palette.divider}`,
   wordBreak: 'break-word',
+  whiteSpace: 'pre-line', // This preserves newlines and basic formatting
 }));
 
 const Message = ({ message }) => {
@@ -25,7 +26,7 @@ const Message = ({ message }) => {
   
   return (
     <MessageWrapper isUser={isUser}>
-      <MessageContent isUser={isUser}>
+      <MessageContent>
         {typeof message.content === 'string' ? message.content : message.content}
       </MessageContent>
     </MessageWrapper>

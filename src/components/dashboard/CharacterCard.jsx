@@ -1,9 +1,26 @@
-// src/components/dashboard/EnhancedCharacterCard.jsx
+// src/components/dashboard/CharacterCard.jsx
 import React from 'react';
-import { Card, CardContent, Box, Typography, Avatar, Button, Chip, IconButton, Fade } from '@mui/material';
-import { Message, Favorite, MoreVert, Share, Star } from '@mui/icons-material';
+import { Card, CardContent, Box, Typography, Button, Chip, IconButton, Fade } from '@mui/material';
+import { Message, Favorite, Star } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
+
+const CardWrapper = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  width: '100%',
+  height: '100%',
+  minHeight: 0,
+  minWidth: 0,
+  padding: 0,
+  boxSizing: 'border-box',
+  overflow: 'visible',
+  position: 'static',
+  top: 'unset',
+  left: 'unset',
+  zIndex: 'auto',
+}));
 
 const StyledCard = styled(Card)(({ theme }) => ({
   background: 'linear-gradient(145deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
@@ -14,58 +31,43 @@ const StyledCard = styled(Card)(({ theme }) => ({
   transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
   position: 'relative',
   overflow: 'hidden',
-  height: 420,
-  '&::before': {
-    content: '""',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: 'linear-gradient(145deg, transparent 0%, rgba(102, 126, 234, 0.1) 100%)',
-    opacity: 0,
-    transition: 'opacity 0.4s ease',
-  },
-  '&:hover': {
-    transform: 'translateY(-12px) scale(1.02)',
-    boxShadow: '0 25px 50px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.2)',
-    '&::before': {
-      opacity: 1,
-    },
-    '& .character-avatar': {
-      transform: 'scale(1.1)',
-    },
-    '& .action-button': {
-      opacity: 1,
-      transform: 'translateY(0)',
-    },
+  width: '100%',
+  maxWidth: 600,
+  minWidth: 0,
+  margin: '0 auto',
+  height: 'auto',
+  maxHeight: '90vh',
+  display: 'flex',
+  flexDirection: 'column',
+  boxSizing: 'border-box',
+  [theme.breakpoints.down('sm')]: {
+    maxWidth: '98vw',
+    borderRadius: 12,
   },
 }));
 
 const ImageContainer = styled(Box)(({ theme }) => ({
   position: 'relative',
-  height: 200,
+  width: '100%',
+  height: 220,
   overflow: 'hidden',
   borderRadius: '20px 20px 0 0',
   background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  [theme.breakpoints.down('sm')]: {
+    height: 140,
+    borderRadius: '12px 12px 0 0',
+  },
 }));
 
 const CharacterImage = styled('img')(({ theme }) => ({
   width: '100%',
   height: '100%',
-  objectFit: 'cover',
+  objectFit: 'contain',
   transition: 'transform 0.4s ease',
-}));
-
-const CharacterAvatar = styled(Avatar)(({ theme }) => ({
-  width: 80,
-  height: 80,
-  border: '4px solid rgba(255,255,255,0.2)',
-  position: 'absolute',
-  bottom: -40,
-  left: 20,
-  transition: 'transform 0.4s ease',
-  boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+  background: '#fff',
 }));
 
 const StatusBadge = styled(Chip)(({ theme }) => ({
@@ -113,15 +115,15 @@ const CategoryChip = styled(Chip)(({ theme }) => ({
 }));
 
 const Description = styled(Typography)(({ theme }) => ({
-  fontSize: '0.9rem',
+  fontSize: '1rem',
   color: theme.palette.text.secondary,
-  lineHeight: 1.5,
+  lineHeight: 1.6,
   marginBottom: theme.spacing(2),
-  display: '-webkit-box',
-  WebkitLineClamp: 2,
-  WebkitBoxOrient: 'vertical',
-  overflow: 'hidden',
+  display: 'block',
+  overflow: 'visible',
   minHeight: 48,
+  WebkitLineClamp: 'unset',
+  WebkitBoxOrient: 'unset',
 }));
 
 const StatsContainer = styled(Box)(({ theme }) => ({
@@ -153,12 +155,13 @@ const ChatButton = styled(Button)(({ theme }) => ({
   fontWeight: 600,
   flex: 1,
   padding: theme.spacing(1.2, 2),
-  opacity: 0,
-  transform: 'translateY(10px)',
+  // Always visible
+  opacity: 1,
+  transform: 'none',
   transition: 'all 0.4s ease',
   '&:hover': {
     background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
-    transform: 'translateY(0) scale(1.05)',
+    transform: 'scale(1.05)',
   },
 }));
 
@@ -193,110 +196,77 @@ const CharacterCard = ({ character, onClick }) => {
 
   const handleChatClick = (e) => {
     e.stopPropagation();
-    // Navigate to full-screen chat
-    navigate(`/chat/${character.id}`, { 
-      state: { character, fullScreen: true }
-    });
-  };
-
-  const handleCardClick = () => {
-    if (onClick) {
-      onClick(character);
-    }
-  };
-
-  const handleActionClick = (e, action) => {
-    e.stopPropagation();
-    console.log(`${action} clicked for`, character.name);
+    navigate(`/chat/${character.id}`, { state: { character } });
   };
 
   return (
-    <Fade in timeout={600}>
-      <StyledCard onClick={handleCardClick} className="character-card">
-        <ImageContainer>
-          <CharacterImage 
-            src={character.img || '/api/placeholder/400/200'} 
-            alt={character.name}
-            className="character-avatar"
-          />
-          <CharacterAvatar 
-            src={character.img || '/api/placeholder/80/80'} 
-            alt={character.name}
-            className="character-avatar"
-          />
-          <StatusBadge label="Online" size="small" />
-          <TopActions>
-            <RatingStars>
-              {[1, 2, 3, 4, 5].map((star) => (
-                <Star 
-                  key={star} 
-                  sx={{ 
-                    fontSize: 16, 
-                    color: star <= (character.rating || 4) ? '#ffd700' : 'rgba(255,255,255,0.3)' 
-                  }} 
-                />
-              ))}
-            </RatingStars>
-          </TopActions>
-        </ImageContainer>
+    <CardWrapper>
+      <Fade in timeout={600}>
+        <StyledCard className="character-card">
+          <ImageContainer>
+            <CharacterImage 
+              src={character.img || '/api/placeholder/400/200'} 
+              alt={character.name}
+              className="character-avatar"
+            />
+            <StatusBadge label="Online" size="small" />
+            <TopActions>
+              <RatingStars>
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star 
+                    key={star} 
+                    sx={{ 
+                      fontSize: 16, 
+                      color: star <= (character.rating || 4) ? '#ffd700' : 'rgba(255,255,255,0.3)' 
+                    }} 
+                  />
+                ))}
+              </RatingStars>
+            </TopActions>
+          </ImageContainer>
 
-        <CardContentStyled>
-          <CharacterName variant="h6">
-            {character.name}
-          </CharacterName>
-          
-          <CreatorText variant="body2">
-            by @{character.creator || 'Giga character AI'}
-          </CreatorText>
-
-          <CategoryChip 
-            label={character.type || 'Historical Figure'} 
-            size="small" 
-          />
-
-          <Description>
-            {character.description || "An engaging character ready to chat with you about their fascinating life and experiences."}
-          </Description>
-
-          <StatsContainer>
-            <StatItem>
-              <Message fontSize="small" />
-              <span>{character.messages || '2.1k'}</span>
-            </StatItem>
-            <StatItem>
-              <Favorite fontSize="small" />
-              <span>{character.likes || '847'}</span>
-            </StatItem>
-          </StatsContainer>
-
-          <ActionButtons>
-            <ChatButton 
-              className="action-button"
-              onClick={handleChatClick}
-              startIcon={<Message />}
-            >
-              Start Chat
-            </ChatButton>
+          <CardContentStyled>
+            <CharacterName variant="h6">
+              {character.name}
+            </CharacterName>
             
-            <IconButtonStyled 
-              className="action-button"
-              onClick={(e) => handleActionClick(e, 'share')}
-              size="small"
-            >
-              <Share fontSize="small" />
-            </IconButtonStyled>
-            
-            <IconButtonStyled 
-              className="action-button"
-              onClick={(e) => handleActionClick(e, 'more')}
-              size="small"
-            >
-              <MoreVert fontSize="small" />
-            </IconButtonStyled>
-          </ActionButtons>
-        </CardContentStyled>
-      </StyledCard>
-    </Fade>
+            <CreatorText variant="body2">
+              by @{character.creator || 'Giga character AI'}
+            </CreatorText>
+
+            <CategoryChip 
+              label={character.type || 'Historical Figure'} 
+              size="small" 
+            />
+
+            <Description>
+              {character.description || "An engaging character ready to chat with you about their fascinating life and experiences."}
+            </Description>
+
+            <StatsContainer>
+              <StatItem>
+                <Message fontSize="small" />
+                <span>{character.messages || '2.1k'}</span>
+              </StatItem>
+              <StatItem>
+                <Favorite fontSize="small" />
+                <span>{character.likes || '847'}</span>
+              </StatItem>
+            </StatsContainer>
+
+            <ActionButtons>
+              <ChatButton 
+                className="action-button"
+                onClick={handleChatClick}
+                startIcon={<Message />}
+              >
+                Start Chat
+              </ChatButton>
+            </ActionButtons>
+          </CardContentStyled>
+        </StyledCard>
+      </Fade>
+    </CardWrapper>
   );
 };
 

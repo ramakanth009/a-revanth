@@ -35,12 +35,15 @@ const SendButton = styled(IconButton)(({ theme }) => ({
   color: 'white',
   height: 44,
   width: 44,
+  transition: 'transform 0.15s cubic-bezier(0.4,0,0.2,1)',
   '&:hover': {
     backgroundColor: theme.palette.primary.dark,
+    transform: 'scale(1.1)',
   },
   '&:disabled': {
     backgroundColor: theme.palette.action.disabled,
     color: theme.palette.action.disabled,
+    transform: 'none',
   },
 }));
 

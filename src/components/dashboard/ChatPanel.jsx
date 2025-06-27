@@ -22,7 +22,6 @@ import ChatInput from './ChatInput';
 import ChatHistoryPanel from './ChatHistoryPanel';
 
 const ChatContainer = styled(Box)(({ theme, open }) => ({
-  width: open ? 'calc(100vw - 280px)' : 0,
   backgroundColor: theme.palette.background.secondary,
   borderLeft: `1px solid ${theme.palette.divider}`,
   display: 'flex',

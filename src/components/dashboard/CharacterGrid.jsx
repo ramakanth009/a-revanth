@@ -186,7 +186,8 @@ const CharacterGrid = ({ onCharacterClick, activeSection }) => {
       'Sachin Tendulkar': 'Cricket Legend',
       'Shah Rukh Khan': 'Actor, Producer',
     };
-    return typeMap[name] || 'Historical Figure';
+    // Change default from 'Historical Figure' to 'Political Figure'
+    return typeMap[name] || 'Political Figure';
   };
 
   const extractCategory = (name) => {
@@ -288,25 +289,7 @@ const CharacterGrid = ({ onCharacterClick, activeSection }) => {
 
   return (
     <Section>
-      <SectionHeader>
-        <Box>
-          <SectionTitle>
-            {activeSection}
-            <Chip label={`${characters.length} characters`} size="small" />
-          </SectionTitle>
-          {getSectionDescription() && (
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-              {getSectionDescription()}
-            </Typography>
-          )}
-        </Box>
-        {characters.length > 8 && (
-          <ViewAllLink onClick={() => console.log(`View all ${activeSection}`)}>
-            View all
-          </ViewAllLink>
-        )}
-      </SectionHeader>
-      
+      {/* Removed SectionHeader and SectionTitle for non-history sections */}
       <CharacterBoxContainer>
         {characters.map((character) => (
           <CharacterCard 

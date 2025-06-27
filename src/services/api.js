@@ -110,6 +110,10 @@ class ApiService {
       };
 
       const response = await this.client.post('/chat', requestData);
+      // Ensure chat_history is always an array and sorted
+      if (response.data.chat_history && Array.isArray(response.data.chat_history)) {
+        response.data.chat_history = this.sortMessagesByTimestamp(response.data.chat_history);
+      }
       return response.data;
     } catch (error) {
       throw this.handleError(error, 'Failed to send message');
@@ -129,6 +133,10 @@ class ApiService {
   async getSessionMessages(sessionId) {
     try {
       const response = await this.client.get(`/get_session_messages?session_id=${sessionId}`);
+      // Ensure chat_history is always an array and sorted
+      if (response.data.chat_history && Array.isArray(response.data.chat_history)) {
+        response.data.chat_history = this.sortMessagesByTimestamp(response.data.chat_history);
+      }
       return response.data;
     } catch (error) {
       throw this.handleError(error, 'Failed to load session messages');
@@ -247,6 +255,12 @@ class ApiService {
     } catch {
       return false;
     }
+  }
+
+  // Utility: Sort messages by timestamp if available
+  sortMessagesByTimestamp(messages) {
+    if (!messages.length || !messages[0].timestamp) return messages;
+    return [...messages].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
   }
 }
 

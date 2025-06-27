@@ -1,13 +1,26 @@
 import React, { useState } from 'react';
-import { Box } from '@mui/material';
+import { Box, Button } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import CharacterGrid from '../components/dashboard/CharacterGrid';
 import ChatPanel from '../components/dashboard/ChatPanel';
+import { useAuth } from '../context/AuthContext';
 
 const DashboardContainer = styled(Box)(({ theme }) => ({
   display: 'flex',
   minHeight: '100vh',
   background: theme.palette.background.default,
+  flexDirection: 'column', // Add column direction for header
+}));
+
+const DashboardHeader = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'flex-end',
+  alignItems: 'center',
+  padding: theme.spacing(2, 3, 0, 3),
+  minHeight: 64,
+  [theme.breakpoints.down('md')]: {
+    padding: theme.spacing(2, 2, 0, 2),
+  },
 }));
 
 const MainContent = styled(Box)(({ theme }) => ({
@@ -34,6 +47,7 @@ const Dashboard = () => {
   const [selectedCharacter, setSelectedCharacter] = useState(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('Discover');
+  const { logout } = useAuth();
 
   const handleCharacterClick = (character) => {
     setSelectedCharacter(character);
@@ -56,7 +70,16 @@ const Dashboard = () => {
 
   return (
     <DashboardContainer>
-      
+      <DashboardHeader>
+        <Button
+          variant="outlined"
+          color="primary"
+          onClick={logout}
+          sx={{ fontWeight: 600 }}
+        >
+          Logout
+        </Button>
+      </DashboardHeader>
       <MainContent>
         <ContentArea chatOpen={isChatOpen}>
           <CharacterGrid 
