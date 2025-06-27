@@ -75,14 +75,14 @@ const Dashboard = () => {
       <StarField /> {/* Render StarField as background */}
       <DashboardContainer>
         <DashboardHeader>
-          <Button
+          {/* <Button
             variant="outlined"
             color="primary"
             onClick={logout}
             sx={{ fontWeight: 600 }}
           >
             Logout
-          </Button>
+          </Button> */}
         </DashboardHeader>
         <MainContent>
           <ContentArea chatOpen={isChatOpen}>
