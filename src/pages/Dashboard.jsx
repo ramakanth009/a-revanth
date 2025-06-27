@@ -9,9 +9,37 @@ import StarField from '../components/common/StarField';
 const DashboardContainer = styled(Box)(({ theme }) => ({
   display: 'flex',
   minHeight: '100vh',
+  width: '100vw',
+  marginTop: '20px !important',
   flexDirection: 'column',
-  position: 'relative', // Ensure stacking context
-  zIndex: 1,            // Above StarField
+  position: 'relative',
+  zIndex: 1,
+  overflow: 'hidden',
+  
+  '@media (max-width: 1200px)': {
+    width: '100vw',
+    marginTop: '18px !important',
+  },
+  
+  '@media (max-width: 960px)': {
+    width: '100vw',
+    marginTop: '16px !important',
+  },
+  
+  '@media (max-width: 600px)': {
+    width: '100vw',
+    marginTop: '14px !important',
+  },
+  
+  '@media (max-width: 480px)': {
+    width: '100vw',
+    marginTop: '12px !important',
+  },
+  
+  '@media (max-width: 375px)': {
+    width: '100vw',
+    marginTop: '10px !important',
+  },
 }));
 
 const DashboardHeader = styled(Box)(({ theme }) => ({
@@ -20,17 +48,61 @@ const DashboardHeader = styled(Box)(({ theme }) => ({
   alignItems: 'center',
   padding: theme.spacing(2, 3, 0, 3),
   minHeight: 64,
-  [theme.breakpoints.down('md')]: {
+  width: '100%',
+  
+  '@media (max-width: 1200px)': {
+    padding: theme.spacing(2, 2.5, 0, 2.5),
+    minHeight: 60,
+  },
+  
+  '@media (max-width: 960px)': {
     padding: theme.spacing(2, 2, 0, 2),
+    minHeight: 56,
+  },
+  
+  '@media (max-width: 600px)': {
+    padding: theme.spacing(1.5, 1.5, 0, 1.5),
+    minHeight: 52,
+  },
+  
+  '@media (max-width: 480px)': {
+    padding: theme.spacing(1.2, 1.2, 0, 1.2),
+    minHeight: 48,
+  },
+  
+  '@media (max-width: 375px)': {
+    padding: theme.spacing(1, 1, 0, 1),
+    minHeight: 44,
   },
 }));
 
 const MainContent = styled(Box)(({ theme }) => ({
-  
   flex: 1,
   display: 'flex',
-  [theme.breakpoints.down('md')]: {
-    marginLeft: 0,
+  width: '100%',
+  overflow: 'hidden',
+  
+  '@media (max-width: 1200px)': {
+    width: '100%',
+  },
+  
+  '@media (max-width: 960px)': {
+    width: '100%',
+  },
+  
+  '@media (max-width: 600px)': {
+    width: '100%',
+    flexDirection: 'column',
+  },
+  
+  '@media (max-width: 480px)': {
+    width: '100%',
+    flexDirection: 'column',
+  },
+  
+  '@media (max-width: 375px)': {
+    width: '100%',
+    flexDirection: 'column',
   },
 }));
 
@@ -39,9 +111,59 @@ const ContentArea = styled(Box)(({ theme, chatOpen }) => ({
   padding: theme.spacing(3),
   overflow: 'auto',
   transition: 'all 0.3s ease',
-  display: chatOpen ? 'none' : 'block', // Always hide when chat is open
-  [theme.breakpoints.down('md')]: {
+  display: chatOpen ? 'none' : 'block',
+  width: '100%',
+  
+  '@media (max-width: 1200px)': {
+    padding: theme.spacing(2.5),
+  },
+  
+  '@media (max-width: 960px)': {
     padding: theme.spacing(2),
+  },
+  
+  '@media (max-width: 600px)': {
+    padding: theme.spacing(1.5),
+    display: chatOpen ? 'none' : 'block',
+  },
+  
+  '@media (max-width: 480px)': {
+    padding: theme.spacing(1.2),
+    display: chatOpen ? 'none' : 'block',
+  },
+  
+  '@media (max-width: 375px)': {
+    padding: theme.spacing(1),
+    display: chatOpen ? 'none' : 'block',
+  },
+}));
+
+const ResponsiveButton = styled(Button)(({ theme }) => ({
+  fontWeight: 600,
+  
+  '@media (max-width: 1200px)': {
+    fontSize: '0.9rem',
+    padding: theme.spacing(1, 2),
+  },
+  
+  '@media (max-width: 960px)': {
+    fontSize: '0.85rem',
+    padding: theme.spacing(0.8, 1.8),
+  },
+  
+  '@media (max-width: 600px)': {
+    fontSize: '0.8rem',
+    padding: theme.spacing(0.6, 1.5),
+  },
+  
+  '@media (max-width: 480px)': {
+    fontSize: '0.75rem',
+    padding: theme.spacing(0.5, 1.2),
+  },
+  
+  '@media (max-width: 375px)': {
+    fontSize: '0.7rem',
+    padding: theme.spacing(0.4, 1),
   },
 }));
 
@@ -58,12 +180,11 @@ const Dashboard = () => {
 
   const handleChatClose = () => {
     setIsChatOpen(false);
-    setTimeout(() => setSelectedCharacter(null), 300); // Delay for animation
+    setTimeout(() => setSelectedCharacter(null), 300);
   };
 
   const handleBackToCharacters = () => {
     setIsChatOpen(false);
-    // Don't clear selectedCharacter immediately to allow for potential re-opening
   };
 
   const handleSectionChange = (section) => {
@@ -72,17 +193,16 @@ const Dashboard = () => {
 
   return (
     <>
-      <StarField /> {/* Render StarField as background */}
+      <StarField />
       <DashboardContainer>
         {/* <DashboardHeader>
-          <Button
+          <ResponsiveButton
             variant="outlined"
             color="primary"
             onClick={logout}
-            sx={{ fontWeight: 600 }}
           >
             Logout
-          </Button>
+          </ResponsiveButton>
         </DashboardHeader> */}
         <MainContent>
           <ContentArea chatOpen={isChatOpen}>
