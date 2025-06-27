@@ -24,7 +24,7 @@ const DashboardHeader = styled(Box)(({ theme }) => ({
 }));
 
 const MainContent = styled(Box)(({ theme }) => ({
-  marginLeft: 280,
+  
   flex: 1,
   display: 'flex',
   [theme.breakpoints.down('md')]: {
