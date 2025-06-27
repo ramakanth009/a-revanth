@@ -66,7 +66,8 @@ const StarField = () => {
       radial-gradient(ellipse at bottom, #1e1e1e 0%, #151515 25%, #0a0a0a 75%, #000000 100%)
     `,
     overflow: 'hidden',
-    zIndex: -1,
+    zIndex: -9999, // Lower z-index to ensure it's always behind
+    pointerEvents: 'none', // Prevent background from blocking UI
   };
 
   const milkyWayStyle = {

@@ -4,12 +4,14 @@ import { styled } from '@mui/material/styles';
 import CharacterGrid from '../components/dashboard/CharacterGrid';
 import ChatPanel from '../components/dashboard/ChatPanel';
 import { useAuth } from '../context/AuthContext';
+import StarField from '../components/common/StarField';
 
 const DashboardContainer = styled(Box)(({ theme }) => ({
   display: 'flex',
   minHeight: '100vh',
-  background: theme.palette.background.default,
-  flexDirection: 'column', // Add column direction for header
+  flexDirection: 'column',
+  position: 'relative', // Ensure stacking context
+  zIndex: 1,            // Above StarField
 }));
 
 const DashboardHeader = styled(Box)(({ theme }) => ({
@@ -69,32 +71,35 @@ const Dashboard = () => {
   };
 
   return (
-    <DashboardContainer>
-      <DashboardHeader>
-        <Button
-          variant="outlined"
-          color="primary"
-          onClick={logout}
-          sx={{ fontWeight: 600 }}
-        >
-          Logout
-        </Button>
-      </DashboardHeader>
-      <MainContent>
-        <ContentArea chatOpen={isChatOpen}>
-          <CharacterGrid 
-            onCharacterClick={handleCharacterClick}
-            activeSection={activeSection}
+    <>
+      <StarField /> {/* Render StarField as background */}
+      <DashboardContainer>
+        <DashboardHeader>
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={logout}
+            sx={{ fontWeight: 600 }}
+          >
+            Logout
+          </Button>
+        </DashboardHeader>
+        <MainContent>
+          <ContentArea chatOpen={isChatOpen}>
+            <CharacterGrid 
+              onCharacterClick={handleCharacterClick}
+              activeSection={activeSection}
+            />
+          </ContentArea>
+          <ChatPanel
+            open={isChatOpen}
+            character={selectedCharacter}
+            onClose={handleChatClose}
+            onBack={handleBackToCharacters}
           />
-        </ContentArea>
-        <ChatPanel
-          open={isChatOpen}
-          character={selectedCharacter}
-          onClose={handleChatClose}
-          onBack={handleBackToCharacters}
-        />
-      </MainContent>
-    </DashboardContainer>
+        </MainContent>
+      </DashboardContainer>
+    </>
   );
 };
 

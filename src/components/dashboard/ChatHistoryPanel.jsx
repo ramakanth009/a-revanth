@@ -18,6 +18,7 @@ import {
   AccessTime,
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
+import StarField from '../common/StarField';
 
 const PanelContainer = styled(Box)(({ theme, open }) => ({
   position: 'fixed',
@@ -25,7 +26,7 @@ const PanelContainer = styled(Box)(({ theme, open }) => ({
   right: open ? 0 : -400,
   width: 400,
   height: '100vh',
-  backgroundColor: theme.palette.background.secondary,
+  backgroundColor: 'rgba(20, 20, 30, 0.85)', // Good: semi-transparent
   borderLeft: `1px solid ${theme.palette.divider}`,
   zIndex: 1500,
   transition: 'right 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -140,6 +141,7 @@ const ChatHistoryPanel = ({
 
   return (
     <>
+      <StarField /> {/* Add StarField as background */}
       <Backdrop open={open} onClick={onClose} />
       <PanelContainer open={open}>
         <PanelHeader>

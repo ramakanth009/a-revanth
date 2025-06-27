@@ -15,7 +15,7 @@ import { styled } from '@mui/material/styles';
 
 const StyledDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialog-paper': {
-    backgroundColor: theme.palette.background.secondary,
+    backgroundColor: 'rgba(20, 20, 30, 0.85)', // Change to semi-transparent
     border: `1px solid ${theme.palette.divider}`,
     borderRadius: 12,
     maxWidth: 500,

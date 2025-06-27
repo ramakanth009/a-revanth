@@ -22,7 +22,7 @@ import ChatInput from './ChatInput';
 import ChatHistoryPanel from './ChatHistoryPanel';
 
 const ChatContainer = styled(Box)(({ theme, open }) => ({
-  backgroundColor: theme.palette.background.secondary,
+  backgroundColor: 'rgba(20, 20, 30, 0.85)', // Change to semi-transparent
   borderLeft: `1px solid ${theme.palette.divider}`,
   display: 'flex',
   flexDirection: 'column',

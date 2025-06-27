@@ -39,6 +39,7 @@ const CharacterBoxContainer = styled(Box)(({ theme }) => ({
   display: 'flex',
   flexWrap: 'wrap',
   gap: theme.spacing(2),
+  justifyContent: 'center', // Center the cards horizontally
   '& > *': {
     flex: '1 1 calc(25% - 12px)',
     minWidth: '280px',
