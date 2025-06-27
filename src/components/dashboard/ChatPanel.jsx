@@ -422,12 +422,12 @@ const ChatPanel = ({ open, character, onClose, onBack }) => {
             </ChatHeaderLeft>
             
             <ChatHeaderRight>
-              <ResponsiveIconButton 
+              {/* <ResponsiveIconButton 
                 onClick={() => setShowHistory(true)}
                 title="Chat History"
               >
                 <HistoryIcon />
-              </ResponsiveIconButton>
+              </ResponsiveIconButton> */}
               
               <ResponsiveIconButton 
                 onClick={startNewSession}
